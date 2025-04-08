@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      background: linear-gradient(to right, #2c5364, #203a43, #0f2027);
+    }
+
+    .container {
+      text-align: center;
+      background-color: #fff;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      max-width: 600px;
+      width: 100%;
+    }
+
+    .city-input {
+      margin-bottom: 20px;
+    }
+
+    input {
+      padding: 10px;
+      font-size: 16px;
+      width: 70%;
+      margin-right: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .city-list {
+      margin-top: 20px;
+    }
+
+    .city-item {
+      margin: 10px 0;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+    }
+
+    .remove-btn {
+      background-color: #dc3545;
+      border: none;
+      padding: 5px 10px;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 5px;
+    }
+
+    .remove-btn:hover {
+      background-color: #b02a37;
+    }
+
+    .timezone-info {
+      font-size: 14px;
+      color: #555;
+      margin-top: 5px;
+    }
+
+    .home-btn-d
+    {
+        margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Dashboard</h1>
+    <p id="user-info">Please log in to manage your dashboard.</p>
+    <div id="auth-buttons">
+      <button id="login-button">Log In</button>
+      <button id="logout-button" style="display:none;">Log Out</button>
+    </div>
+    <div>
+        <a href="home.html">
+            <button class="home-btn-d">Home</button>
+        </a>
+    </div>
+    <div id="dashboard" style="display:none;">
+      <div class="city-input">
+        <input type="text" id="city-input" placeholder="Enter a city name">
+        <button id="add-city-button">Add City</button>
+      </div>
+      <div class="city-list" id="city-list"></div>
+    </div>
+  </div>
+
+  <script>
+    const apiKey = 'I4NOLHIZDRHT';
+    netlifyIdentity.init();
+
+    const userInfo = document.getElementById('user-info');
+    const loginButton = document.getElementById('login-button');
+    const logoutButton = document.getElementById('logout-button');
+    const dashboard = document.getElementById('dashboard');
+    const cityInput = document.getElementById('city-input');
+    const addCityButton = document.getElementById('add-city-button');
+    const cityList = document.getElementById('city-list');
+
+    let currentUser = null;
+
+    function updateUI(user) {
+      if (user) {
+        currentUser = user;
+        userInfo.textContent = `Welcome, ${user.user_metadata.full_name || user.email}`;
+        loginButton.style.display = 'none';
+        logoutButton.style.display = 'inline-block';
+        dashboard.style.display = 'block';
+        loadCities();
+      } else {
+        currentUser = null;
+        userInfo.textContent = 'Please log in to manage your cities.';
+        loginButton.style.display = 'inline-block';
+        logoutButton.style.display = 'none';
+        dashboard.style.display = 'none';
+      }
+    }
+
+    async function fetchCityTime(city) {
+      try {
+        const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`);
+        if (!response.ok) throw new Error('Invalid city');
+        const data = await response.json();
+        const timezoneOffset = data.timezone / 3600;
+        const currentTime = new Date(new Date().getTime() + timezoneOffset * 3600000);
+        return `${currentTime.toUTCString()} (UTC${timezoneOffset >= 0 ? '+' : ''}${timezoneOffset})`;
+      } catch (error) {
+        return 'Time data unavailable';
+      }
+    }
+
+    function saveCity(city) {
+      if (!currentUser) return;
+      const userId = currentUser.id;
+      const userCities = JSON.parse(localStorage.getItem(userId)) || [];
+      userCities.push(city);
+      localStorage.setItem(userId, JSON.stringify(userCities));
+      loadCities();
+    }
+
+    function loadCities() {
+      if (!currentUser) return;
+      const userId = currentUser.id;
+      const userCities = JSON.parse(localStorage.getItem(userId)) || [];
+      cityList.innerHTML = '';
+      userCities.forEach(async (city, index) => {
+        const cityItem = document.createElement('div');
+        const timeData = await fetchCityTime(city);
+        cityItem.innerHTML = `
+          <strong>${city}</strong>
+          <div>${timeData}</div>
+          <button class="remove-btn" data-index="${index}">Remove</button>
+        `;
+        cityList.appendChild(cityItem);
+        cityItem.querySelector('.remove-btn').addEventListener('click', function () {
+          removeCity(index);
+        });
+      });
+    }
+
+    function removeCity(index) {
+      if (!currentUser) return;
+      const userId = currentUser.id;
+      const userCities = JSON.parse(localStorage.getItem(userId)) || [];
+      userCities.splice(index, 1);
+      localStorage.setItem(userId, JSON.stringify(userCities));
+      loadCities();
+    }
+
+    loginButton.addEventListener('click', () => netlifyIdentity.open());
+    logoutButton.addEventListener('click', () => netlifyIdentity.logout());
+    addCityButton.addEventListener('click', () => {
+      const city = cityInput.value.trim();
+      if (city) {
+        saveCity(city);
+        cityInput.value = '';
+      }
+    });
+
+    netlifyIdentity.on('login', (user) => {
+      updateUI(user);
+      netlifyIdentity.close();
+    });
+
+    netlifyIdentity.on('logout', () => {
+      updateUI(null);
+    });
+
+    updateUI(netlifyIdentity.currentUser());
+  </script>
+</body>
+</html>
