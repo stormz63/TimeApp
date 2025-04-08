@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login or Register</title>
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: linear-gradient(to right, #2c5364, #203a43, #0f2027);
+    }
+
+    .container {
+      text-align: center;
+      background-color: #fff;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #user-info {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <button>
+      <a href="home.html">
+        <button>Home</button>
+      </a>
+    </button>
+    <h1>Login or Register</h1>
+    <button id="login-button">Log In</button>
+    <button id="logout-button" style="display:none;">Log Out</button>
+    <div id="user-info">Please log in to access your account.</div>
+  </div>
+
+  <script>
+    window.onload = function () {
+      netlifyIdentity.init();
+
+      document.getElementById('login-button').onclick = function () {
+        netlifyIdentity.open();
+      };
+
+      document.getElementById('register-button').onclick = function () {
+        netlifyIdentity.open('register');
+      };
+
+      document.getElementById('logout-button').onclick = function () {
+        netlifyIdentity.logout();
+      };
+
+      netlifyIdentity.on('login', (user) => {
+        console.log('User logged in:', user);
+        document.getElementById('user-info').textContent = `Hello, ${user.user_metadata.full_name}`;
+        document.getElementById('login-button').style.display = 'none';
+        document.getElementById('register-button').style.display = 'none';
+        document.getElementById('logout-button').style.display = 'block';
+      });
+
+      netlifyIdentity.on('logout', () => {
+        console.log('User logged out');
+        document.getElementById('user-info').textContent = 'Please log in to access your account.';
+        document.getElementById('login-button').style.display = 'inline-block';
+        document.getElementById('register-button').style.display = 'inline-block';
+        document.getElementById('logout-button').style.display = 'none';
+      });
+    };
+  </script>
+</body>
+</html>

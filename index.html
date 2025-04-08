@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Current Date & Time</title>
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="logo">TimeNow</div>
+    <nav class="nav-buttons">
+      <a href="register.html">
+        <button>Register</button>
+      </a>
+      <a href="home.html">
+        <button id="homeBtn">Home</button>
+      </a>
+      <a href="dashboard.html" target="_blank">
+        <button>Dashboard</button>
+      </a>
+      <button id="worldBtn">World Time</button>
+      <button id="settingsBtn">Settings</button>
+      <div><strong>Your Location:</strong> <span id="location"></span></div>
+    </nav>
+  </header>
+
+  <div class="container" id="main">
+    <div class="datetime">
+      <div><strong>Date:</strong> <span id="date"></span></div>
+      <div><strong>Time:</strong> <span id="time"></span></div>
+    </div>
+  </div>
+
+  <div id="worldModal" class="modal hidden">
+    <div class="modal-content">
+      <span class="close-btn">&times;</span>
+      <h2>World Time</h2>
+      <ul id="worldTimes"></ul>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
