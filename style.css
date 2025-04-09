@@ -2,11 +2,12 @@ body {
     margin: 0;
     font-family: 'Poppins', sans-serif;
     background: linear-gradient(to right, #2c5364, #203a43, #0f2027);
-    color: #fff;
+    color: white;
     display: flex;
     flex-direction: column;
     align-items: center;
     min-height: 100%;
+    overflow-x: hidden
   }
   
   header {
