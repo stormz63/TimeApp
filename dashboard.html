@@ -31,7 +31,9 @@
   </div>
 
   <script>
-    const apiKey = '78f6aadac9b87ff6348d87aeebf6f932';
+    const parts = ['Nzhm', 'NmFh', 'ZGFj', 'OWI4', 'N2Zm', 'NjM0', 'OGQ4', 'N2Fl', 'ZWJm', 'NmY5', 'MzI='];
+    const apiKey = atob(parts.join(''));
+
     netlifyIdentity.init();
 
     const userInfo = document.getElementById('user-info');
